@@ -22,3 +22,4 @@ function maxLength(string, maxLen) {
   return string.length <= maxLen;
 }
 maxLength('', 4);
+

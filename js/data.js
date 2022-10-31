@@ -1,4 +1,7 @@
 import {getNumID1, getNumID2, getRandomNumber, getRandomArrayElement} from './util.js';
+import {performPictures} from './picture.js';
+
+performPictures();
 const NAMES = [
   'Аня',
   'Маня',

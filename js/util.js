@@ -17,4 +17,6 @@ function getNumID2() {
   return k++;
 }
 
-export {getRandomNumber, getNumID1, getNumID2, getRandomArrayElement};
+const isEscKey = (keyCode) => keyCode === 'Escape';
+
+export {getRandomNumber, getNumID1, getNumID2, getRandomArrayElement, isEscKey};

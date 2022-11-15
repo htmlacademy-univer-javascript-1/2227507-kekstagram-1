@@ -1,5 +1,5 @@
 import {createPhotoDescription} from './data.js';
-import {openBigPic} from './bigpic.js';
+import {openBigPic} from './big_picture.js';
 
 const picturesList = document.querySelector('.pictures');
 const photoTemplate = document.querySelector('#picture')

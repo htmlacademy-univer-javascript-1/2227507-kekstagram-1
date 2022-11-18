@@ -1,4 +1,7 @@
-import {isEscKey} from './util.js';
+import {isEscKey, createWordToNumber} from './util.js';
+
+const COMMENTS = 5;
+const ENDINGS = ['комментария', 'комментариев', 'комментариев'];
 
 const bigPicElement = document.querySelector('.big-picture');
 const commentCountElement = document.querySelector('.comments-count');
@@ -14,6 +17,10 @@ const commentListElement = document.querySelector('.social__comments');
 const commentTemplate = document.querySelector('#comment')
   .content
   .querySelector('.social__comment');
+
+let visibleComments = 0;
+let comment;
+let commentLength;
 
 const renderComments = (comments) => {
   commentListElement.innerHTML = '';
@@ -32,12 +39,31 @@ const renderComments = (comments) => {
   commentListElement.appendChild(commentsFragment);
 };
 
+const updateComments = () => {
+  if (visibleComments === comment.length) {
+    commentsLoader.classList.add('hidden');
+    return;
+  }
+  commentsLoader.classList.remove('hidden');
+};
+
+const showComments = (from, to) => {
+  visibleComments = Math.min(to, comment.length);
+  renderComments(comment.slice(from, visibleComments));
+
+  commentCountOnPic.textContent = `${visibleComments} из ${commentLength} ${createWordToNumber(commentLength, ENDINGS)}`;
+  updateComments();
+};
+
+const onCommentsUpdate = (evt) => {
+  evt.preventDefault();
+  showComments(visibleComments, visibleComments + COMMENTS);
+};
+
 const closeBigPic = () => {
   bigPicElement.classList.add('hidden');
   document.body.classList.remove('open');
-
-  commentCountOnPic.classList.remove('hidden');
-  commentsLoader.classList.remove('hidden');
+  removeListeners();
 };
 
 const onBigPicKeydown = (evt) => {
@@ -50,22 +76,34 @@ const onBigPicCloseClick = () => {
   closeBigPic();
 };
 
+const addListeners = () => {
+  document.addEventListener('keydown', onBigPicKeydown);
+  buttonCloseElement.addEventListener('click', onBigPicCloseClick, {once:true});
+  commentsLoader.addEventListener('click', onCommentsUpdate);
+};
+
+function removeListeners() {
+  document.removeEventListener('keydown', onBigPicKeydown);
+  buttonCloseElement.removeEventListener('click', onBigPicCloseClick, {once:true});
+  commentsLoader.removeEventListener('click', onCommentsUpdate);
+}
+
 const openBigPic = ({url, likes, comments, description}) => {
   imgElement.src = url;
   commentCountElement.textContent = comments.length;
   likesCountElement.textContent = likes;
   descriptionElement.textContent = description;
 
-  renderComments(comments);
-
   document.body.classList.add('open');
   bigPicElement.classList.remove('hidden');
+  commentCountOnPic.classList.remove('hidden');
 
-  commentCountOnPic.classList.add('hidden');
-  commentsLoader.classList.add('hidden');
+  comment = comments;
+  commentLength = comments.length;
 
-  document.addEventListener('keydown', onBigPicKeydown);
-  buttonCloseElement.addEventListener('click', onBigPicCloseClick, {once:true});
+  showComments(0,COMMENTS);
+  addListeners();
 };
+
 
 export {openBigPic};

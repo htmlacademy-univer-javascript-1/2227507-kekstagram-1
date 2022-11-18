@@ -50,7 +50,6 @@ const updateComments = () => {
 const showComments = (from, to) => {
   visibleComments = Math.min(to, comment.length);
   renderComments(comment.slice(from, visibleComments));
-
   commentCountOnPic.textContent = `${visibleComments} из ${commentLength} ${createWordToNumber(commentLength, ENDINGS)}`;
   updateComments();
 };

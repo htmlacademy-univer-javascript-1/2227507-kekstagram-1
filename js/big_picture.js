@@ -104,5 +104,4 @@ const openBigPic = ({url, likes, comments, description}) => {
   addListeners();
 };
 
-
 export {openBigPic};

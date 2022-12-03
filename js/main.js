@@ -1,11 +1,6 @@
-import './util.js';
-import {createPhotoDescription} from './data.js';
-import './picture_editor.js';
-import {addFormAction, setUserFormSubmit} from './picture_editor.js';
+import {addFormAction} from './picture_editor.js';
+import {getPictureList} from './picture.js';
 
 
-const PHOTOS = 25;
-
-Array.from({length: PHOTOS}, createPhotoDescription);
+getPictureList();
 addFormAction();
-setUserFormSubmit();

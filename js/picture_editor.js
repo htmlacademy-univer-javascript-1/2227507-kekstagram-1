@@ -1,7 +1,8 @@
-import {isEscKey, showAlert} from './util.js';
+import {isEscKey} from './util.js';
 import {changeEffect, resetFilter} from './picture_effects.js';
 import {activateScale, deactivateScale} from './picture_scale.js';
 import {sendData} from './api.js';
+import {showSuccessMessage, showErrorMessage} from './user_messages.js';
 
 const form = document.querySelector('.img-upload__form');
 const uploadImage = document.querySelector('#upload-file');
@@ -35,15 +36,15 @@ const isCorrectHashtag = (value) => regexHashtag.test(value);
 const isCorrectComment = (value) => value.length < 140;
 const isCorrectCount = (value) => value.split(' ').length <= 5;
 
-const validateHashtag = (value) => {
-  const hashtags = value.split(' ');
+const validateHashtag = () => {
+  const hashtags = hashtag.value.split(' ');
   isCheckPassedForHashtag = hashtags.every(isCorrectHashtag);
   checkSubmitButton();
   return isCheckPassedForHashtag;
 };
 
-const validateUniqueHashtag = (value) => {
-  const hashtags = value.split(' ');
+const validateUniqueHashtag = () => {
+  const hashtags = hashtag.value.split(' ');
   const uniqueHashtag = new Set(hashtags);
   return uniqueHashtag.size === hashtag.length;
 };
@@ -125,7 +126,7 @@ const onFileInputChange = () => {
 
 const blockSubmitButton = () => {
   submitButton.disabled = true;
-  submitButton.textContent = 'Загружаю...';
+  submitButton.textContent = 'Публикуется...';
 };
 
 const unblockSubmitButton = () => {
@@ -133,31 +134,38 @@ const unblockSubmitButton = () => {
   submitButton.textContent = 'Опубликовать';
 };
 
-const setUserFormSubmit = (onSuccess) => {
+const onSubmitForm = (evt) => {
+  evt.preventDefault();
 
-  form.addEventListener('submit', (evt) => {
-    evt.preventDefault();
-
-    if (pristineValidate()) {
-      blockSubmitButton();
-      sendData(
-        () => {
-          onSuccess();
-          unblockSubmitButton();
-        },
-        () => {
-          showAlert('Не удалось опубликовать изображение. Попробуйте ещё раз');
-          unblockSubmitButton();
-        },
-        new FormData(evt.target),
-      );
-    }
-  });
+  if (pristineValidate()) {
+    blockSubmitButton();
+    sendData(
+      () => {
+        resetUploadForm();
+        showSuccessMessage();
+        unblockSubmitButton();
+      },
+      () => {
+        resetUploadForm();
+        showErrorMessage('Не удалось отправить форму!');
+        unblockSubmitButton();
+      },
+      new FormData(form),
+    );
+  }
 };
+
+
+function resetUploadForm() {
+  form.reset();
+  onCancelButtonClick();
+  //resetFileInput();
+}
 
 const addFormAction = () => {
   addValidator();
   uploadImage.addEventListener('change', onFileInputChange);
+  form.addEventListener('submit', onSubmitForm);
 };
 
-export {setUserFormSubmit, addFormAction};
+export {resetUploadForm, addFormAction};

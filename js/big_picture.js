@@ -4,7 +4,6 @@ const COMMENTS = 5;
 const ENDINGS = ['комментария', 'комментариев', 'комментариев'];
 
 const bigPicElement = document.querySelector('.big-picture');
-const commentCountElement = document.querySelector('.comments-count');
 const imgElement = document.querySelector('.big-picture__img img');
 const likesCountElement = document.querySelector('.likes-count');
 const descriptionElement = document.querySelector('.social__caption');
@@ -67,6 +66,7 @@ const closeBigPic = () => {
 
 const onBigPicKeydown = (evt) => {
   if (isEscKey(evt.key)) {
+    evt.preventDefault();
     closeBigPic();
   }
 };
@@ -87,21 +87,26 @@ function removeListeners() {
   commentsLoader.removeEventListener('click', onCommentsUpdate);
 }
 
-const openBigPic = ({url, likes, comments, description}) => {
-  imgElement.src = url;
-  commentCountElement.textContent = comments.length;
-  likesCountElement.textContent = likes;
-  descriptionElement.textContent = description;
+const fillBigPicture = (picture) => {
+  commentListElement.innerHTML = '';
+  imgElement.src = picture.url;
+  imgElement.alt = picture.description;
+  likesCountElement.textContent = picture.likes;
+  descriptionElement.textContent = picture.description;
+};
 
-  document.body.classList.add('open');
+const showBigPicture = (picture) => {
   bigPicElement.classList.remove('hidden');
   commentCountOnPic.classList.remove('hidden');
+  document.body.classList.add('modal-open');
 
-  comment = comments;
-  commentLength = comments.length;
+  comment = picture.comments;
+  commentLength = comment.length;
 
-  showComments(0,COMMENTS);
+  fillBigPicture(picture);
+  showComments(0, COMMENTS);
   addListeners();
 };
 
-export {openBigPic};
+
+export {showBigPicture};

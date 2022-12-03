@@ -94,7 +94,7 @@ const changeEffect = ({target}) => {
 };
 
 const resetFilter = () => {
-  sliderElementField.noUiSlider.destroy();
+  //sliderElementField.noUiSlider.destroy();
   image.style.filter = null;
   image.className = '';
   sliderElementField.classList.add('hidden');

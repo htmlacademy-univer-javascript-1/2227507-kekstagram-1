@@ -1,35 +1,41 @@
-import {createPhotoDescription} from './data.js';
-import {openBigPic} from './big_picture.js';
+import {showBigPicture} from './big_picture.js';
+import {showErrorMessage} from './user_messages.js';
+import {getData} from './api.js';
 
 const picturesList = document.querySelector('.pictures');
-const photoTemplate = document.querySelector('#picture')
-  .content
-  .querySelector('.picture');
-const picturesFragment = document.createDocumentFragment();
+const photoTemplate = document.querySelector('#picture').content.querySelector('.picture');
+//const picturesFragment = document.createDocumentFragment();
 
-const appendPicture = (picture) => {
-  const {id, url, likes, comments} = picture;
-
-  const pictureElement = photoTemplate.cloneNode(true);
-  pictureElement.querySelector('.picture__img').src = url;
-  pictureElement.querySelector('.picture__likes').textContent = likes;
-  pictureElement.querySelector('.picture__comments').textContent = comments.length;
-  pictureElement.dataset.id = id;
-
-  picturesFragment.appendChild(pictureElement);
+const removeOLdPictureList = () => {
+  picturesList.querySelectorAll('.picture').forEach((item) => item.remove());
 };
 
-const performPictures = () => {
-  const photos = createPhotoDescription();
-  photos.forEach(appendPicture);
-  picturesList.appendChild(picturesFragment);
-  picturesList.addEventListener('click', (evt) => {
-    const pictureElement = evt.target.closest('.picture');
-    if (pictureElement) {
-      const clickedPicture = photos.find(({id}) => Number(pictureElement.dataset.id) === id);
-      openBigPic(clickedPicture);
-    }
+const createPictureList = (pictureData) => {
+  const pictureListFragment = document.createDocumentFragment();
+  removeOLdPictureList();
+  pictureData.forEach(({id, description, url, likes, comments}) => {
+    const picture = photoTemplate.cloneNode(true);
+    picture.href = `#${id}`;
+    picture.querySelector('.picture__img').src = url;
+    picture.querySelector('.picture__img').alt = description;
+    picture.querySelector('.picture__comments').textContent = comments.length;
+    picture.querySelector('.picture__likes').textContent = likes;
+    pictureListFragment.append(picture);
+    picture.addEventListener('click', () => {
+      showBigPicture({url, description, comments, likes});
+    });
   });
+  picturesList.append(pictureListFragment);
 };
 
-export {performPictures};
+const getPictureList = () => {
+  getData()
+    .then((data) => {
+      createPictureList(data);
+    })
+    .catch(() => {
+      showErrorMessage('Фотографии отсутствуют...');
+    });
+};
+
+export {getPictureList};

@@ -1,3 +1,6 @@
+import {createRandomArrayFromRange, debounce} from './util.js';
+import {createPictureList} from './picture.js';
+
 const RANGE_OPTIONS = {
   grayscale: {
     min: 0,
@@ -42,6 +45,14 @@ const UNIT = {
 const image = document.querySelector('.img-upload__preview img');
 const sliderElementField = document.querySelector('.img-upload__effect-level');
 const effectLevel = document.querySelector('.effect-level__value');
+const imgFiltersForm = document.querySelector('.img-filters__form');
+const imgFiltersButton = document.querySelectorAll('.img-filters__button');
+
+const resetFilter = () => {
+  image.style.filter = null;
+  image.className = '';
+  sliderElementField.classList.add('hidden');
+};
 
 const createSlider = () => {
   noUiSlider.create(sliderElementField, {
@@ -57,10 +68,7 @@ const createSlider = () => {
 
 const changeEffect = ({target}) => {
   if (target.value === 'none') {
-    sliderElementField.noUiSlider.destroy();
-    image.style.filter = null;
-    image.className = '';
-    sliderElementField.classList.add('hidden');
+    resetFilter();
     return;
   }
 
@@ -93,11 +101,40 @@ const changeEffect = ({target}) => {
   });
 };
 
-const resetFilter = () => {
-  //sliderElementField.noUiSlider.destroy();
-  image.style.filter = null;
-  image.className = '';
-  sliderElementField.classList.add('hidden');
+const toggleActiveButton = (button) => {
+  imgFiltersButton.forEach((el) => {
+    el.classList.remove('img-filters__button--active');
+  });
+  button.classList.add('img-filters__button--active');
 };
 
-export {changeEffect, resetFilter};
+const applyFilter = (id, imagesArray) => {
+  let newImageArray = [];
+  switch (id) {
+    case 'filter-random':
+      newImageArray = createRandomArrayFromRange(0, imagesArray.length - 1, 10)
+        .map((index) => imagesArray[index]);
+      break;
+    case 'filter-discussed':
+      newImageArray = imagesArray.slice().sort((a, b) => b.comments.length - a.comments.length);
+      break;
+    default:
+      newImageArray = imagesArray;
+  }
+
+  createPictureList(newImageArray);
+};
+
+const applyTimeOut = debounce(applyFilter);
+
+const initFilterButtons = (imagesArray) => {
+  imgFiltersForm.addEventListener('click', (evt) => {
+    if (evt.target.tagName === 'BUTTON') {
+      toggleActiveButton(evt.target);
+      applyTimeOut(evt.target.id, imagesArray);
+    }
+  });
+};
+
+
+export {changeEffect, resetFilter, initFilterButtons};

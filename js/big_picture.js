@@ -60,7 +60,7 @@ const onCommentsUpdate = (evt) => {
 
 const closeBigPic = () => {
   bigPicElement.classList.add('hidden');
-  document.body.classList.remove('open');
+  document.body.classList.remove('modal-open');
   removeListeners();
 };
 
@@ -109,4 +109,4 @@ const showBigPicture = (picture) => {
 };
 
 
-export {showBigPicture};
+export {showBigPicture,closeBigPic};

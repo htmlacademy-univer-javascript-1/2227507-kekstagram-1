@@ -24,33 +24,42 @@ const onWindowClick = (evt) => {
   }
 };
 
+const addEventListener = () => {
+  window.addEventListener('click', onWindowClick);
+  document.addEventListener('keydown', onResultEscPress);
+};
+
+const removeEventListener = () => {
+  window.removeEventListener('click', onWindowClick);
+  document.removeEventListener('keydown', onResultEscPress);
+};
+
 const showSuccessMessage = () => {
   const successMessage = successMessageTemplate.cloneNode(true);
   const successButton = successMessage.querySelector('.success__button');
+  document.body.append(successMessage);
+  addEventListener();
+  successButton.addEventListener('click', onResultCloseClick);
 
   successButton.addEventListener('click', () => {
     successMessage.remove();
+    successButton.removeEventListener('click', onResultCloseClick);
+    removeEventListener();
   });
-  document.body.append(successMessage);
-
-  window.addEventListener('click', onWindowClick);
-  document.addEventListener('keydown', onResultEscPress, {once: true});
-  successButton.addEventListener('click', onResultCloseClick, {once: true});
 };
 
 const showErrorMessage = (message) => {
   const errorMessage = errorMessageTemplate.cloneNode(true);
-  const errorButton = errorMessage.querySelector('.error__button');
-
-  errorMessage.querySelector('.error__title').textContent = message;
+  const errorButton = document.querySelector('.error__button');
+  document.querySelector('.error__title').textContent = message;
+  document.body.append(errorMessage);
+  addEventListener();
+  errorButton.addEventListener('click', onResultCloseClick);
   errorButton.addEventListener('click', () => {
     errorMessage.remove();
+    errorButton.removeEventListener('click', onResultCloseClick);
+    removeEventListener();
   });
-  document.body.append(errorMessage);
-
-  window.addEventListener('click', onWindowClick);
-  document.addEventListener('keydown', onResultEscPress, {once: true});
-  errorButton.addEventListener('click', onResultCloseClick, {once: true});
 };
 
 export {showSuccessMessage, showErrorMessage};

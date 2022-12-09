@@ -1,10 +1,13 @@
-import {showBigPicture} from './big_picture.js';
+import {showBigPicture, closeBigPic} from './big_picture.js';
 import {showErrorMessage} from './user_messages.js';
 import {getData} from './api.js';
+import {initFilterButtons} from './picture_effects.js';
 
 const picturesList = document.querySelector('.pictures');
 const photoTemplate = document.querySelector('#picture').content.querySelector('.picture');
 //const picturesFragment = document.createDocumentFragment();
+const imgFilters = document.querySelector('.img-filters');
+
 
 const removeOLdPictureList = () => {
   picturesList.querySelectorAll('.picture').forEach((item) => item.remove());
@@ -29,13 +32,13 @@ const createPictureList = (pictureData) => {
 };
 
 const getPictureList = () => {
-  getData()
-    .then((data) => {
-      createPictureList(data);
-    })
-    .catch(() => {
-      showErrorMessage('Фотографии отсутствуют...');
-    });
+  getData((data) => {
+    createPictureList(data);
+    initFilterButtons(data);
+    closeBigPic();
+    imgFilters.classList.remove('img-filters--inactive');
+
+  }, () => showErrorMessage('Фотографии отсутствуют...'));
 };
 
-export {getPictureList};
+export {getPictureList, createPictureList};

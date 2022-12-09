@@ -42,6 +42,8 @@ const UNIT = {
   blur: 'px',
 };
 
+const DEBOUNCE_DELAY = 500;
+
 const image = document.querySelector('.img-upload__preview img');
 const sliderElementField = document.querySelector('.img-upload__effect-level');
 const effectLevel = document.querySelector('.effect-level__value');
@@ -121,11 +123,10 @@ const applyFilter = (id, imagesArray) => {
     default:
       newImageArray = imagesArray;
   }
-
   createPictureList(newImageArray);
 };
 
-const applyTimeOut = debounce(applyFilter);
+const applyTimeOut = debounce(applyFilter, DEBOUNCE_DELAY);
 
 const initFilterButtons = (imagesArray) => {
   imgFiltersForm.addEventListener('click', (evt) => {

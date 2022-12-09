@@ -7,10 +7,10 @@ const bigPicElement = document.querySelector('.big-picture');
 const imgElement = document.querySelector('.big-picture__img img');
 const likesCountElement = document.querySelector('.likes-count');
 const descriptionElement = document.querySelector('.social__caption');
-const buttonCloseElement = document.querySelector('#picture-cancel');
+const buttonCloseElement = document.querySelector('.big-picture__cancel');
 
 const commentCountOnPic = document.querySelector('.social__comment-count');
-const commentsLoader = document.querySelector('.comments-loader');
+const commentsLoader = document.querySelector('.social__comments-loader');
 
 const commentListElement = document.querySelector('.social__comments');
 const commentTemplate = document.querySelector('#comment')
@@ -71,19 +71,20 @@ const onBigPicKeydown = (evt) => {
   }
 };
 
-const onBigPicCloseClick = () => {
+const onBigPicCloseClick = (evt) => {
+  evt.preventDefault();
   closeBigPic();
 };
 
 const addListeners = () => {
   document.addEventListener('keydown', onBigPicKeydown);
-  buttonCloseElement.addEventListener('click', onBigPicCloseClick, {once:true});
+  buttonCloseElement.addEventListener('click', onBigPicCloseClick);
   commentsLoader.addEventListener('click', onCommentsUpdate);
 };
 
 function removeListeners() {
   document.removeEventListener('keydown', onBigPicKeydown);
-  buttonCloseElement.removeEventListener('click', onBigPicCloseClick, {once:true});
+  buttonCloseElement.removeEventListener('click', onBigPicCloseClick);
   commentsLoader.removeEventListener('click', onCommentsUpdate);
 }
 
@@ -107,6 +108,5 @@ const showBigPicture = (picture) => {
   showComments(0, COMMENTS);
   addListeners();
 };
-
 
 export {showBigPicture,closeBigPic};

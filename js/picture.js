@@ -5,7 +5,6 @@ import {initFilterButtons} from './picture_effects.js';
 
 const picturesList = document.querySelector('.pictures');
 const photoTemplate = document.querySelector('#picture').content.querySelector('.picture');
-//const picturesFragment = document.createDocumentFragment();
 const imgFilters = document.querySelector('.img-filters');
 
 
@@ -21,8 +20,8 @@ const createPictureList = (pictureData) => {
     picture.href = `#${id}`;
     picture.querySelector('.picture__img').src = url;
     picture.querySelector('.picture__img').alt = description;
-    picture.querySelector('.picture__comments').textContent = comments.length;
-    picture.querySelector('.picture__likes').textContent = likes;
+    picture.querySelector('.picture__comments').textContent = comments.length.toString();
+    picture.querySelector('.picture__likes').textContent = likes.toString();
     pictureListFragment.append(picture);
     picture.addEventListener('click', () => {
       showBigPicture({url, description, comments, likes});

@@ -3,104 +3,89 @@ import {changeEffect, resetFilter} from './picture_effects.js';
 import {activateScale, deactivateScale} from './picture_scale.js';
 import {sendData} from './api.js';
 import {showSuccessMessage, showErrorMessage} from './user_messages.js';
+import {resetFileInput} from './picture_upload.js';
+
+const MAX_COMMENTS_LENGTH = 140;
+const REGEX_HASHTAG = /^#[a-zа-яё0-9]{1,19}$/i;
+const MAX_HASHTAG_COUNT = 5;
 
 const form = document.querySelector('.img-upload__form');
 const uploadImage = document.querySelector('#upload-file');
 const overlayImage = document.querySelector('.img-upload__overlay');
-const hashtag = form.querySelector('.text__hashtags');
-const comment = form.querySelector('.text__description');
-const effects = form.querySelector('.effects__list');
+const hashtagField = document.querySelector('.text__hashtags');
+const commentField = document.querySelector('.text__description');
+const effects = document.querySelector('.effects__list');
 
-const submitButton = form.querySelector('.img-upload__submit');
+const submitButton = document.querySelector('.img-upload__submit');
 const cancelButton = document.querySelector('#upload-cancel');
 
-let isCheckPassedForHashtag = true;
-let isCheckPassedForComment = true;
-
-const checkSubmitButton = () => {
-  submitButton.disabled = !isCheckPassedForHashtag || !isCheckPassedForComment;
-};
-
 const pristine = new Pristine(form, {
-  classTo: 'text',
-  errorClass: 'text-invalid',
-  successClass: 'text-valid',
-  errorTextParent: 'text',
-  errorTextTag: 'div',
-  errorTextClass: 'text-invalid__error'
-}, true);
+  classTo: 'img-upload__field-wrapper',
+  errorTextParent: 'img-upload__field-wrapper',
+  errorTextClass: 'img-upload__field-wrapper__error',
+});
 
-const regexHashtag = /(^\s*$)|(^#[A-Za-zА-Яа-яЁё0-9]{1,19}$)/;
+const isValidComment = (comment) => comment.length <= MAX_COMMENTS_LENGTH;
 
-const isCorrectHashtag = (value) => regexHashtag.test(value);
-const isCorrectComment = (value) => value.length < 140;
-const isCorrectCount = (value) => value.split(' ').length <= 5;
+const createHashtagArray = (value) => value.split(' ');
 
-const validateHashtag = () => {
-  const hashtags = hashtag.value.split(' ');
-  isCheckPassedForHashtag = hashtags.every(isCorrectHashtag);
-  checkSubmitButton();
-  return isCheckPassedForHashtag;
+const isValidHashtag = (value) => {
+  if (!value) {
+    return true;
+  }
+  const hashtag = createHashtagArray(value);
+  return hashtag.every((test) => REGEX_HASHTAG.test(test));
 };
 
-const validateUniqueHashtag = () => {
-  const hashtags = hashtag.value.split(' ');
-  const uniqueHashtag = new Set(hashtags);
-  return uniqueHashtag.size === hashtag.length;
+const isValidCount = (value) => {
+  const hashtag = createHashtagArray(value);
+  return hashtag.length <= MAX_HASHTAG_COUNT;
 };
 
-const validateComment = (value) => {
-  isCheckPassedForComment = isCorrectComment(value);
-  checkSubmitButton();
-  return isCheckPassedForComment;
+const isUniqueHashtags = (value) => {
+  const hashtag = createHashtagArray(value);
+  const uniqHashtag = new Set(hashtag);
+  return uniqHashtag.size === hashtag.length;
 };
 
 const addValidator  = () => {
   pristine.addValidator(
-    hashtag,
-    validateHashtag,
+    hashtagField,
+    isValidHashtag,
     'Неподходящий хэштег'
   );
 
   pristine.addValidator(
-    hashtag,
-    isCorrectCount,
+    hashtagField,
+    isValidCount,
     'Слишком много хэштегов. Нельзя указывать больше 5.'
   );
 
   pristine.addValidator(
-    hashtag,
-    validateUniqueHashtag(),
+    hashtagField,
+    isUniqueHashtags,
     'Повторяющийся хэштег'
   );
 
   pristine.addValidator(
-    comment,
-    validateComment,
+    commentField,
+    isValidComment,
     'Слишком длинный комментарий. Его длина не должна превышать 140 символов'
   );
 };
 
-form.addEventListener('submit', () => {
-  pristine.validate();
-});
-
-const pristineReset = () => pristine.reset();
-const pristineValidate = () => pristine.validate();
-
-function openOverlayImage() {
-  document.addEventListener('keydown', onOverlayEscKeydown);
-  cancelButton.addEventListener('click', closeOverlayImage, {once: true});
-  document.body.classList.add('modal-open');
+export function openOverlayImage() {
   overlayImage.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+  document.addEventListener('keydown', onOverlayEscKeydown);
+  cancelButton.addEventListener('click', onCancelButtonClick);
   effects.addEventListener('change', changeEffect);
   activateScale();
 }
 
 function closeOverlayImage() {
   form.reset();
-  pristineReset();
-  uploadImage.value = '';
+  pristine.reset();
   resetFilter();
   overlayImage.classList.add('hidden');
   document.body.classList.remove('modal-open');
@@ -111,7 +96,8 @@ function closeOverlayImage() {
 }
 
 function onOverlayEscKeydown(evt) {
-  if (isEscKey(evt.key) && evt.target !== hashtag && evt.target !== comment) {
+  if (isEscKey(evt.key) && evt.target !== hashtagField && evt.target !== commentField) {
+    evt.preventDefault();
     closeOverlayImage();
   }
 }
@@ -134,10 +120,15 @@ const unblockSubmitButton = () => {
   submitButton.textContent = 'Опубликовать';
 };
 
+function resetUploadForm() {
+  form.reset();
+  onCancelButtonClick();
+  resetFileInput();
+}
+
 const onSubmitForm = (evt) => {
   evt.preventDefault();
-
-  if (pristineValidate()) {
+  if (pristine.validate()) {
     blockSubmitButton();
     sendData(
       () => {
@@ -155,12 +146,6 @@ const onSubmitForm = (evt) => {
   }
 };
 
-
-function resetUploadForm() {
-  form.reset();
-  onCancelButtonClick();
-  //resetFileInput();
-}
 
 const addFormAction = () => {
   addValidator();
